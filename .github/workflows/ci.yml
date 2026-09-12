@@ -1,0 +1,39 @@
+name: 'CI - Build and Test'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'release/**'
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+
+  pull_request:
+    branches:
+      - main
+      - 'release/**'
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v7
+
+      - name: 'Setup Java'
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: 'Compile code'
+        run: ./mvnw --batch-mode clean verify
