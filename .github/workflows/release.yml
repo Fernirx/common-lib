@@ -1,0 +1,37 @@
+name: 'Release'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: 'Config Git'
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: 'Setup Java'
+        uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: "Maven Release"
+        run: ./mvnw --batch-mode release:prepare release:perform
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
